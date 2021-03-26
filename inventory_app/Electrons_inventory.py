@@ -274,6 +274,11 @@ class InventoryFrame(MainFrame):
         rows = self.db.advanced_search(cols=cols_for_search, inputs=inputs_for_search, logics=logics_for_search)
         self.populate_results(rows=rows)
 
+    def btn_clear_adv_search(self, event):
+        self.text_ctrl_adv_search_1.SetValue("")
+        self.text_ctrl_adv_search_2.SetValue("")
+        self.text_ctrl_adv_search_3.SetValue("")
+
     def btn_view_result(self, event):
         # get info about the selected component
         selected_row = self.grid_results.GetSelectedRows()[0]
