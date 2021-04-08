@@ -76,7 +76,8 @@ class DKAPIInterface:
     def prompt_app_creation(self):
         print("Admin: please create a DigiKey application to use this program. Refer to README for details.")
         input("Press Enter to Exit..")
-        exit(0)
+        raise RuntimeError("The DigiKey API credentials are absent.")  # this error string is checked against
+        # in Electrons_inventory.py!
 
     def load_tokens(self):
         self.access_token = self.config["tokens"]["access_token"]

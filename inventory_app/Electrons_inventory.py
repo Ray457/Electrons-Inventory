@@ -2,6 +2,7 @@
 import sys
 import logging
 from datetime import datetime
+import os
 import platform
 
 # application specific libraries
@@ -34,6 +35,9 @@ class InventoryFrame(MainFrame):
     def __init__(self, *args, **kwargs):
         MainFrame.__init__(self, *args, **kwargs)  # invoke constructor of the parent class
 
+        # set up the AppData folder
+        os.makedirs("AppData", exist_ok=True)
+
         # camera objects
         self.camera_cap = None
         self.camera_on = False
@@ -55,8 +59,13 @@ class InventoryFrame(MainFrame):
         self.db.connect()
 
         # Digi-Key API interface
-        self.dk_api = DKAPIInterface(auth_complete_callback=self.auth_complete)
-        if self.dk_api.auth_valid:
+        try:
+            self.dk_api = DKAPIInterface(auth_complete_callback=self.auth_complete)
+        except RuntimeError as e:
+            if "DigiKey API" in str(e):
+                self.dk_api = None
+                wx.CallAfter(self.Close)
+        if self.dk_api is not None and self.dk_api.auth_valid:
             self.update_auth_status(auth_valid=True)
 
         # on_close handler
@@ -550,12 +559,13 @@ class InventoryFrame(MainFrame):
 
     def on_close(self, event):
         # clean up the Digi-Key API
-        if self.dk_api.httpd is not None:
+        if self.dk_api is not None and self.dk_api.httpd is not None:
             self.dk_api.httpd.shutdown()  # stop the server
             self.dk_api.httpd.close()  # close the TCP socket
 
         # release the database
-        self.db.close()
+        if self.db is not None:
+            self.db.close()
 
         # stop the camera
         if self.camera_on:
