@@ -87,4 +87,5 @@ __pycache__
 
 # exe building
 exe_build/build/*
-exe_build/output/*
+exe_build/dist/*
+*.spec
