@@ -559,9 +559,8 @@ class InventoryFrame(MainFrame):
 
     def on_close(self, event):
         # clean up the Digi-Key API
-        if self.dk_api is not None and self.dk_api.httpd is not None:
-            self.dk_api.httpd.shutdown()  # stop the server
-            self.dk_api.httpd.close()  # close the TCP socket
+        if self.dk_api is not None:
+            self.dk_api.cleanup()
 
         # release the database
         if self.db is not None:

@@ -29,10 +29,7 @@ class DKAPIInterface:
         self.PRODUCT2DBARCODE_URL = "https://sandbox-api.digikey.com/Barcoding/v3/Product2DBarcodes/"
         '''
         self.REDIRECT_URL = "https://127.0.0.1:{}".format(AUTH_RESP_PORT)  # production
-        self.AUTH_URL = "https://api.digikey.com/v1/oauth2/authorize?" \
-                        "response_type=code&" \
-                        "client_id={}&" \
-                        "redirect_uri={}".format(self.CLIENT_ID, self.REDIRECT_URL)
+        self.AUTH_URL = ""
         self.ACCESS_URL = "https://api.digikey.com/v1/oauth2/token"  # same for access and refresh tokens
 
         self.PRODUCT2DBARCODE_URL = "https://api.digikey.com/Barcoding/v3/Product2DBarcodes/"
@@ -62,6 +59,7 @@ class DKAPIInterface:
             try:  # test for the client credentials
                 self.CLIENT_ID = self.config["client_cred"]["id"]
                 self.CLIENT_SECRET = self.config["client_cred"]["secret"]
+                self.build_auth_url()
             except KeyError:
                 self.prompt_app_creation()
 
@@ -73,6 +71,12 @@ class DKAPIInterface:
         # callback that gets called when the user authorisation is complete
         self.auth_complete_callback = auth_complete_callback
 
+    def build_auth_url(self):
+        self.AUTH_URL = "https://api.digikey.com/v1/oauth2/authorize?" \
+                        "response_type=code&" \
+                        "client_id={}&" \
+                        "redirect_uri={}".format(self.CLIENT_ID, self.REDIRECT_URL)
+
     def prompt_app_creation(self):
         print("Admin: please create a DigiKey application to use this program. Refer to README for details.")
         input("Press Enter to Exit..")
@@ -80,14 +84,23 @@ class DKAPIInterface:
         # in Electrons_inventory.py!
 
     def load_tokens(self):
-        self.access_token = self.config["tokens"]["access_token"]
-        self.refresh_token = self.config["tokens"]["refresh_token"]
-        self.access_token_expiry = int(self.config["tokens"]["access_expiry"])
-        self.refresh_token_expiry = int(self.config["tokens"]["refresh_expiry"])
+        # try to load access tokens. If failed, set to expired
+        try:
+            self.access_token = self.config["tokens"]["access_token"]
+            self.access_token_expiry = int(self.config["tokens"]["access_expiry"])
+        except KeyError:
+            self.access_token = ""
+            self.access_token_expiry = 0
+
+        try:
+            self.refresh_token = self.config["tokens"]["refresh_token"]
+            self.refresh_token_expiry = int(self.config["tokens"]["refresh_expiry"])
+        except KeyError:
+            self.refresh_token = ""
+            self.refresh_token_expiry = 0
 
     def save_tokens(self):
-        if len(self.config.sections()) == 0:  # config file was not present
-            self.config["tokens"] = {}
+        self.config["tokens"] = {}
         self.config["tokens"]["access_token"] = \
             "{}".format(self.access_token)  # has to store in str
         self.config["tokens"]["access_expiry"] = \
@@ -256,6 +269,11 @@ class DKAPIInterface:
         if barcode2d_resp.status_code == 200:  # OK
             success = True
         return success, barcode2d_resp
+
+    def cleanup(self):
+        if self.httpd is not None:
+            self.httpd.shutdown()  # stop the server
+            self.httpd.server_close()  # close the TCP socket
 
 
 # class factory to link the html handler with the GUI and to pass information around
