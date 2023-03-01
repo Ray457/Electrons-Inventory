@@ -65,7 +65,7 @@ class MainFrame(wx.Frame):
         self.button_checkin = wx.Button(self.notebook_main_Search, wx.ID_ANY, "Check In...")
         self.button_edit = wx.Button(self.notebook_main_Search, wx.ID_ANY, "Edit...")
         self.notebook_main_Help = wx.Panel(self.notebook_main, wx.ID_ANY)
-        self.text_ctrl_help_url = wx.TextCtrl(self.notebook_main_Help, wx.ID_ANY, "https://github.com/Ray457/Electrons-Inventory", style=wx.TE_CENTRE | wx.TE_READONLY)
+        self.text_ctrl_help_url = wx.TextCtrl(self.notebook_main_Help, wx.ID_ANY, "https://github.com/UOA-FSAE/Electrons-Inventory", style=wx.TE_CENTRE | wx.TE_READONLY)
 
         self.__set_properties()
         self.__do_layout()

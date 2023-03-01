@@ -7,7 +7,7 @@ import platform
 
 # application specific libraries
 from pylibdmtx.pylibdmtx import decode
-from cv2 import cv2
+import cv2
 import numpy as np
 
 # GUI
